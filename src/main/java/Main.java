@@ -1,3 +1,9 @@
+/**
+ 4.8 Sorting Algorithm:
+ @author Timothy C
+ @since 1/5/24
+ */
+
 import sort.ComplexTimSort;
 import sort.SimpleTimSort;
 import sort.OtherSorts;
@@ -14,12 +20,7 @@ public class Main {
 	private static final int INCREMENT = 100000;
 	private static final List<Integer[]> testArrays = new ArrayList<>();
 	private static final String FAILURE = "Sort failed!";
-
-	static {
-		for (int i = 1; i <= 10; i++) {
-			testArrays.add(generateRandomArray(i * INCREMENT));
-		}
-	}
+	private static boolean testing = false;
 
 	public static void main(String[] args) {
 		testAndPrint(ComplexTimSort::sort);
@@ -38,6 +39,10 @@ public class Main {
 	}
 
 	public static void testSortWorks(Consumer<Integer[]> sortAlgorithm) {
+		if (!testing) {
+			testing = true;
+			fillTestArrays();
+		}
 		var testArray = testArrays.get(0);
 		sortAlgorithm.accept(testArray);
 		for (int i = 0; i < testArray.length - 1; i++) {
@@ -46,6 +51,10 @@ public class Main {
 	}
 
 	public static String testSort(Consumer<Integer[]> sortAlgorithm) {
+		if (!testing) {
+			testing = true;
+			fillTestArrays();
+		}
 		long[] times = new long[10];
 		for (int i = 0; i < 10; i++) {
 			times[i] = sort(sortAlgorithm, i);
@@ -63,15 +72,21 @@ public class Main {
 			return end - start;
 		};
 		return (long) IntStream.range(0, 100)
-		                       .mapToLong(sortTime)
-		                       .average()
-		                       .orElse(0);
+		              .mapToLong(sortTime)
+		              .average()
+		              .orElse(0);
 	}
 
 	public static Integer[] generateRandomArray(int size) {
 		return RANDOM.ints(size, 0, size)
-		             .parallel()
-		             .boxed()
-		             .toArray(Integer[]::new);
+		       .parallel()
+		       .boxed()
+		       .toArray(Integer[]::new);
+	}
+
+	private static void fillTestArrays() {
+		for (int i = 1; i <= 10; i++) {
+			testArrays.add(generateRandomArray(i * INCREMENT));
+		}
 	}
 }
