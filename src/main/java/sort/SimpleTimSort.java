@@ -99,8 +99,8 @@ public interface SimpleTimSort {
 		IntStream.rangeClosed(0, length / runLength)
 		         .parallel()
 		         .map(i -> i * runLength)
-		         .forEach(i -> binarySort(array, i, min(length - 1,
-		                                  i + runLength - 1)));
+		         .forEach(i -> binarySort(array, i,
+		                                  min(length - 1, i + runLength - 1)));
 		for (int size = runLength; size < length; size <<= 1) {
 			final int mergeSize = size;
 			IntConsumer merge = left -> {

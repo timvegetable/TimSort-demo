@@ -14,42 +14,6 @@ public class ComplexTimSort {
 		// This isn't supposed to be instantiated.
 	}
 
-	public static <T extends Comparable<T>> void sort(T[] arr) {
-		minGallop = MIN_GALLOP;
-		int lo = 0;
-		final int hi = arr.length;
-		int remaining = hi;
-		final int minRun = runLength(arr);
-		final ArrayList<int[]> stack = new ArrayList<>(hi / minRun + 1);
-
-		if (remaining < THRESHOLD) {
-			final int startingRunLength = ascendThenCount(arr, lo, hi);
-			binarySort(arr, lo, hi, lo + startingRunLength);
-			return;
-		}
-
-		while (remaining > 0) {
-			int runLength = ascendThenCount(arr, lo, hi);
-			if (runLength < minRun) {
-				final int force = min(remaining, minRun);
-				binarySort(arr, lo, lo + force, lo + runLength);
-				runLength = force;
-			}
-			stack.add(new int[]{lo, runLength});
-			mergeCollapse(arr, stack);
-			lo += runLength;
-			remaining -= runLength;
-		}
-
-		mergeForceCollapse(arr, stack);
-	}
-
-	public static <T extends Comparable<T>> T[] sorted(T[] arr) {
-		T[] output = Arrays.copyOf(arr, arr.length);
-		sort(output);
-		return output;
-	}
-
 	private static <T> int runLength(T[] arr) {
 		int runLength = arr.length;
 		int remainder = 0;
@@ -512,5 +476,41 @@ public class ComplexTimSort {
 
 			mergeAt(arr, stack, n);
 		}
+	}
+
+	public static <T extends Comparable<T>> void sort(T[] arr) {
+		minGallop = MIN_GALLOP;
+		int lo = 0;
+		final int hi = arr.length;
+		int remaining = hi;
+		final int minRun = runLength(arr);
+		final ArrayList<int[]> stack = new ArrayList<>(hi / minRun + 1);
+
+		if (remaining < THRESHOLD) {
+			final int startingRunLength = ascendThenCount(arr, lo, hi);
+			binarySort(arr, lo, hi, lo + startingRunLength);
+			return;
+		}
+
+		while (remaining > 0) {
+			int runLength = ascendThenCount(arr, lo, hi);
+			if (runLength < minRun) {
+				final int force = min(remaining, minRun);
+				binarySort(arr, lo, lo + force, lo + runLength);
+				runLength = force;
+			}
+			stack.add(new int[]{lo, runLength});
+			mergeCollapse(arr, stack);
+			lo += runLength;
+			remaining -= runLength;
+		}
+
+		mergeForceCollapse(arr, stack);
+	}
+
+	public static <T extends Comparable<T>> T[] sorted(T[] arr) {
+		T[] output = Arrays.copyOf(arr, arr.length);
+		sort(output);
+		return output;
 	}
 }
