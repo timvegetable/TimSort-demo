@@ -11,6 +11,7 @@ import sort.OtherSorts;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.IntToLongFunction;
 import java.util.stream.IntStream;
 
@@ -23,7 +24,8 @@ public class Main {
 	private static boolean testing = false;
 
 	public static void main(String[] args) {
-		testAndPrint(ComplexTimSort::sort);
+		testSortWorks(ComplexTimSort::sort);
+//		testSortWorks(i -> {});
 	}
 
 	public static void testAndPrint(Consumer<Integer[]> sortAlgorithm) {
@@ -39,11 +41,7 @@ public class Main {
 	}
 
 	public static void testSortWorks(Consumer<Integer[]> sortAlgorithm) {
-		if (!testing) {
-			testing = true;
-			fillTestArrays();
-		}
-		var testArray = testArrays.get(0);
+		var testArray = generateRandomArray(INCREMENT);
 		sortAlgorithm.accept(testArray);
 		for (int i = 0; i < testArray.length - 1; i++) {
 			assert testArray[i].compareTo(testArray[i + 1]) <= 0: FAILURE;

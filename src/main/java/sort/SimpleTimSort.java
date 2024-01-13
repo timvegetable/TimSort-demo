@@ -1,12 +1,34 @@
 package sort;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
 import static java.lang.Math.min;
 public interface SimpleTimSort {
 	int THRESHOLD = 32;
+
+	static <T extends Comparable<T>> void sort(T[] array) {
+		sort(array, Comparator.naturalOrder());
+	}
+
+	static <T> void sort(T[] array, Comparator<T> comp) {
+		final int runLength = runLength(array);
+		for (int start = 0; start <= array.length; start += runLength) {
+			final int end = min(array.length - 1, start + runLength - 1);
+			binarySort(array, comp, start, end);
+		}
+		for (int size = runLength; size < array.length; size <<= 1) {
+			for (int left = 0; left <= array.length; left += size << 1) {
+				final int mid = left + size - 1;
+				final int right = min(array.length - 1, left + 2 * size - 1);
+				if (mid < right) {
+					merge(array, comp, left, mid, right);
+				}
+			}
+		}
+	}
 
 	private static <T> int runLength(T[] array) {
 		int runLength = array.length;
@@ -18,13 +40,12 @@ public interface SimpleTimSort {
 		return runLength + remainder;
 	}
 
-	private static <T extends Comparable<T>> void binarySort(T[] array,
-	                                                         int start,
-	                                                         int end)
+	private static <T> void binarySort(T[] array, Comparator<T> comp, int start,
+	                                   int end)
 	{
 		for (int i = start + 1; i <= end; i++) {
 			final T target = array[i];
-			final int index = binarySearch(array, start, i, target);
+			final int index = binarySearch(array, comp, start, i, target);
 			for (int j = i; j > index; j--) {
 				array[j] = array[j - 1];
 			}
@@ -32,16 +53,14 @@ public interface SimpleTimSort {
 		}
 	}
 
-	private static <T extends Comparable<T>> int binarySearch(T[] array,
-	                                                          int start,
-	                                                          int end,
-	                                                          T target)
+	private static <T> int binarySearch(T[] array, Comparator<T> comp,
+	                                    int start, int end, T target)
 	{
 		int left = start;
 		int right = end;
 		while (left < right) {
 			final int mid = (left + right) >>> 1;
-			if (array[mid].compareTo(target) <= 0) {
+			if (comp.compare(array[mid], target) <= 0) {
 				left = mid + 1;
 			} else {
 				right = mid;
@@ -50,8 +69,8 @@ public interface SimpleTimSort {
 		return left;
 	}
 
-	private static <T extends Comparable<T>> void merge(T[] array, int start,
-	                                                    int mid, int end)
+	private static <T> void merge(T[] array, Comparator<T> comp,  int start,
+	                              int mid, int end)
 	{
 		T[] left = Arrays.copyOfRange(array, start, mid + 1);
 		T[] right = Arrays.copyOfRange(array, mid + 1, end + 1);
@@ -60,7 +79,7 @@ public interface SimpleTimSort {
 		while (leftIndex < left.length && rightIndex < right.length) {
 			final T leftValue = left[leftIndex];
 			final T rightValue = right[rightIndex];
-			if (leftValue.compareTo(rightValue) < 0) {
+			if (comp.compare(leftValue, rightValue) < 0) {
 				array[start + leftIndex + rightIndex] = leftValue;
 				leftIndex++;
 			} else {
@@ -76,30 +95,17 @@ public interface SimpleTimSort {
 		}
 	}
 
-	static <T extends Comparable<T>> void sort(T[] array) {
-		final int runLength = runLength(array);
-		for (int start = 0; start <= array.length; start += runLength) {
-			final int end = min(array.length - 1, start + runLength - 1);
-			binarySort(array, start, end);
-		}
-		for (int size = runLength; size < array.length; size <<= 1) {
-			for (int left = 0; left <= array.length; left += size << 1) {
-				final int mid = left + size - 1;
-				final int right = min(array.length - 1, left + 2 * size - 1);
-				if (mid < right) {
-					merge(array, left, mid, right);
-				}
-			}
-		}
+	static <T extends Comparable<T>> void parallelSort(T[] array) {
+		sort(array, Comparator.nullsFirst(Comparator.naturalOrder()));
 	}
 
-	static <T extends Comparable<T>> void parallelSort(T[] array) {
+	static <T> void parallelSort(T[] array, Comparator<T> comp) {
 		final int length = array.length;
 		final int runLength = runLength(array);
 		IntStream.rangeClosed(0, length / runLength)
 		         .parallel()
 		         .map(i -> i * runLength)
-		         .forEach(i -> binarySort(array, i,
+		         .forEach(i -> binarySort(array, comp, i,
 		                                  min(length - 1, i + runLength - 1)));
 		for (int size = runLength; size < length; size <<= 1) {
 			final int mergeSize = size;
@@ -107,7 +113,7 @@ public interface SimpleTimSort {
 				final int mid = left + mergeSize - 1;
 				final int right = min(length - 1, left + 2 * mergeSize - 1);
 				if (mid < right) {
-					merge(array, left, mid, right);
+					merge(array, comp, left, mid, right);
 				}
 			};
 			IntStream.rangeClosed(0, length / (mergeSize << 1))
@@ -123,9 +129,21 @@ public interface SimpleTimSort {
 		return output;
 	}
 
+	static <T> T[] sorted(T[] array, Comparator<T> comp) {
+		T[] output = Arrays.copyOf(array, array.length);
+		sort(output, comp);
+		return output;
+	}
+
 	static <T extends Comparable<T>> T[] parallelSorted(T[] array) {
 		T[] output = Arrays.copyOf(array, array.length);
 		parallelSort(output);
+		return output;
+	}
+
+	static <T> T[] parallelSorted(T[] array, Comparator<T> comp) {
+		T[] output = Arrays.copyOf(array, array.length);
+		parallelSort(output, comp);
 		return output;
 	}
 }
