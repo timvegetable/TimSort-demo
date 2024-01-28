@@ -304,17 +304,14 @@ public interface ComplexTimSort {
 			int count2 = 0;
 			while ((count1 | count2) < minGallop) {
 				if (comp.compare(temp[k], arr[j]) < 0) {
-					arr[i] = temp[k];
+					arr[i++] = temp[k++];
 					count1++;
 					count2 = 0;
-					k++;
 				} else {
-					arr[i] = arr[j];
+					arr[i++] = arr[j++];
 					count1 = 0;
 					count2++;
-					j++;
 				}
-				i++;
 
 				if (k == m - l || j == r) {
 					done = true;
