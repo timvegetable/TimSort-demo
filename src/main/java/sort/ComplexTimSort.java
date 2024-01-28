@@ -303,7 +303,7 @@ public interface ComplexTimSort {
 			int count1 = 0;
 			int count2 = 0;
 			while ((count1 | count2) < minGallop) {
-				if (comp.compare(temp[k], arr[j]) < 0) {
+				if (comp.compare(arr[j], temp[k]) > 0) {
 					arr[i++] = temp[k++];
 					count1++;
 					count2 = 0;
@@ -387,7 +387,7 @@ public interface ComplexTimSort {
 			int count1 = 0;
 			int count2 = 0;
 			while ((count1 | count2) < minGallop) {
-				if (comp.compare(temp[k], arr[j]) > 0) {
+				if (comp.compare(arr[j], temp[k]) < 0) {
 					arr[i] = temp[k];
 					count1++;
 					count2 = 0;
